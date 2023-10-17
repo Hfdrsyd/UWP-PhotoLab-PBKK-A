@@ -1,27 +1,4 @@
-﻿//  ---------------------------------------------------------------------------------
-//  Copyright (c) Microsoft Corporation.  All rights reserved.
-// 
-//  The MIT License (MIT)
-// 
-//  Permission is hereby granted, free of charge, to any person obtaining a copy
-//  of this software and associated documentation files (the "Software"), to deal
-//  in the Software without restriction, including without limitation the rights
-//  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-//  copies of the Software, and to permit persons to whom the Software is
-//  furnished to do so, subject to the following conditions:
-// 
-//  The above copyright notice and this permission notice shall be included in
-//  all copies or substantial portions of the Software.
-// 
-//  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-//  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-//  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-//  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-//  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-//  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-//  THE SOFTWARE.
-//  ---------------------------------------------------------------------------------
-
+﻿
 using Microsoft.Graphics.Canvas;
 using System;
 using System.Collections.Generic;
@@ -31,6 +8,7 @@ using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.Storage.Streams;
 using Windows.UI.Core;
+using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
 using Windows.UI.Xaml.Media.Animation;
@@ -268,7 +246,6 @@ namespace PhotoLab
             var index = MainPage.Current.Images.IndexOf(item);
 
             item = newItem;
-            this.Bindings.Update();
 
             UnloadObject(imgRect);
             FindName("imgRect");
@@ -310,6 +287,33 @@ namespace PhotoLab
                 item.Temperature =
                 item.Contrast = 0;
             item.Saturation = 1;
+        }
+        private async void DeletePhoto_Click(object sender, RoutedEventArgs e)
+        {
+            var confirmDialog = new ContentDialog
+            {
+                Title = "Delete Photo",
+                Content = "Are you sure you want to delete this photo?",
+                PrimaryButtonText = "Delete",
+                SecondaryButtonText = "Cancel"
+            };
+
+            var result = await confirmDialog.ShowAsync();
+
+            if (result == ContentDialogResult.Primary)
+            {
+                await DeletePhoto();
+            }
+        }
+
+        private async Task DeletePhoto()
+        {
+            MainPage.Current.Images.Remove(item);
+            await item.ImageFile.DeleteAsync(StorageDeleteOption.PermanentDelete);
+            if (Frame.CanGoBack)
+            {
+                Frame.GoBack();
+            }
         }
 
         private void SmallImage_Loaded(object sender, Windows.UI.Xaml.RoutedEventArgs e)
